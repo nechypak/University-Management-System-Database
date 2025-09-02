@@ -34,7 +34,7 @@ A compact, portfolio-ready relational database that demonstrates SQL proficiency
 
 ## Prerequisites
 - PostgreSQL **14+** (tested on 14/15/16)
-- `psql` or **pgAdmin 4**
+- `psql`(terminal based) or **pgAdmin 4** (friendly UI client) 
 
 ---
 
