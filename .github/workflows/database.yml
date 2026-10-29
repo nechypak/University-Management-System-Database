@@ -1,0 +1,51 @@
+name: Database checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        postgres: ['14', '16', '18']
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_USER: university
+          POSTGRES_PASSWORD: university_ci
+          POSTGRES_DB: university_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U university -d university_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: university
+      PGPASSWORD: university_ci
+      PGDATABASE: university_db
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create schema and load demo data
+        run: psql -X -v ON_ERROR_STOP=1 -f schema.sql
+      - name: Verify repeatable migrations
+        run: psql -X -v ON_ERROR_STOP=1 -f db/migrate.sql
+      - name: Check integrity rules
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/integrity.sql
+      - name: Check upgrade preserves existing data
+        run: psql -X -v ON_ERROR_STOP=1 -f tests/upgrade.sql
+      - name: Run every example query
+        run: |
+          for query in queries/*.sql; do
+            echo "Running $query"
+            psql -X -v ON_ERROR_STOP=1 -f "$query"
+          done
