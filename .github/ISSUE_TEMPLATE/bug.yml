@@ -1,0 +1,16 @@
+name: Database bug
+description: Report incorrect results or a failed database operation
+title: "[Bug]: "
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction SQL and PostgreSQL version
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Expected and actual results
+    validations:
+      required: true
